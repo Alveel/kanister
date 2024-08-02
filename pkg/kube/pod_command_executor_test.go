@@ -17,11 +17,11 @@ package kube
 import (
 	"bytes"
 	"context"
+	"errors"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	. "gopkg.in/check.v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -81,10 +81,10 @@ func (fprp *fakePodCommandExecutorProcessor) ExecWithOptions(ctx context.Context
 	fprp.inExecWithOptionsOpts = &opts
 	fprp.execWithOptionsSyncStart.SyncWithController()
 	if opts.Stdout != nil && len(fprp.execWithOptionsStdout) > 0 {
-		opts.Stdout.Write([]byte(fprp.execWithOptionsStdout)) //nolint: errcheck
+		opts.Stdout.Write([]byte(fprp.execWithOptionsStdout))
 	}
 	if opts.Stderr != nil && len(fprp.execWithOptionsStderr) > 0 {
-		opts.Stderr.Write([]byte(fprp.execWithOptionsStderr)) //nolint: errcheck
+		opts.Stderr.Write([]byte(fprp.execWithOptionsStderr))
 	}
 	fprp.execWithOptionsSyncEnd.SyncWithController()
 

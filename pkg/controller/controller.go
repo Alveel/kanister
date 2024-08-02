@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/kanisterio/kanister/pkg/customresource"
+	osversioned "github.com/openshift/client-go/apps/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"gopkg.in/tomb.v2"
@@ -46,15 +46,16 @@ import (
 	"github.com/kanisterio/kanister/pkg/client/clientset/versioned"
 	"github.com/kanisterio/kanister/pkg/client/clientset/versioned/scheme"
 	"github.com/kanisterio/kanister/pkg/consts"
+	"github.com/kanisterio/kanister/pkg/customresource"
 	"github.com/kanisterio/kanister/pkg/eventer"
 	"github.com/kanisterio/kanister/pkg/field"
 	"github.com/kanisterio/kanister/pkg/log"
-	_ "github.com/kanisterio/kanister/pkg/metrics"
 	"github.com/kanisterio/kanister/pkg/param"
 	"github.com/kanisterio/kanister/pkg/progress"
 	"github.com/kanisterio/kanister/pkg/reconcile"
 	"github.com/kanisterio/kanister/pkg/validate"
-	osversioned "github.com/openshift/client-go/apps/clientset/versioned"
+
+	_ "github.com/kanisterio/kanister/pkg/metrics"
 )
 
 // Controller represents a controller object for kanister custom resources
@@ -441,12 +442,12 @@ func (c *Controller) runAction(ctx context.Context, t *tomb.Tomb, as *crv1alpha1
 	c.logAndSuccessEvent(ctx, fmt.Sprintf("Executing action %s", action.Name), "Started Action", as)
 	tp, err := param.New(ctx, c.clientset, c.dynClient, c.crClient, c.osClient, action)
 	if err != nil {
-		c.incrementActionSetResolutionCounterVec(ACTION_SET_COUNTER_VEC_LABEL_RES_FAILURE)
+		c.incrementActionSetResolutionCounterVec(ActionSetCounterVecLabelResFailure)
 		return err
 	}
 	phases, err := kanister.GetPhases(*bp, action.Name, action.PreferredVersion, *tp)
 	if err != nil {
-		c.incrementActionSetResolutionCounterVec(ACTION_SET_COUNTER_VEC_LABEL_RES_FAILURE)
+		c.incrementActionSetResolutionCounterVec(ActionSetCounterVecLabelResFailure)
 		return err
 	}
 
@@ -454,7 +455,7 @@ func (c *Controller) runAction(ctx context.Context, t *tomb.Tomb, as *crv1alpha1
 	// can be specified in blueprint using actions[name].deferPhase
 	deferPhase, err := kanister.GetDeferPhase(*bp, action.Name, action.PreferredVersion, *tp)
 	if err != nil {
-		c.incrementActionSetResolutionCounterVec(ACTION_SET_COUNTER_VEC_LABEL_RES_FAILURE)
+		c.incrementActionSetResolutionCounterVec(ActionSetCounterVecLabelResFailure)
 		return err
 	}
 
@@ -471,9 +472,9 @@ func (c *Controller) runAction(ctx context.Context, t *tomb.Tomb, as *crv1alpha1
 			if deferErr == nil && coreErr == nil {
 				c.renderActionsetArtifacts(ctx, as, aIDX, as.Namespace, as.Name, action.Name, bp, tp)
 				c.maybeSetActionSetStateComplete(ctx, as, aIDX, bp, coreErr, deferErr)
-				c.incrementActionSetResolutionCounterVec(ACTION_SET_COUNTER_VEC_LABEL_RES_SUCCESS)
+				c.incrementActionSetResolutionCounterVec(ActionSetCounterVecLabelResSuccess)
 			} else {
-				c.incrementActionSetResolutionCounterVec(ACTION_SET_COUNTER_VEC_LABEL_RES_FAILURE)
+				c.incrementActionSetResolutionCounterVec(ActionSetCounterVecLabelResFailure)
 			}
 		}()
 

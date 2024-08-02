@@ -17,11 +17,12 @@ package secrets
 import (
 	"encoding/base64"
 
-	secerrors "github.com/kanisterio/kanister/pkg/secrets/errors"
 	"github.com/pkg/errors"
 	. "gopkg.in/check.v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	secerrors "github.com/kanisterio/kanister/pkg/secrets/errors"
 )
 
 type GCPSecretSuite struct{}
@@ -29,8 +30,8 @@ type GCPSecretSuite struct{}
 var _ = Suite(&GCPSecretSuite{})
 
 func (s *GCPSecretSuite) TestValidateGCPCredentials(c *C) {
-	serviceAccountJson := make([]byte, base64.StdEncoding.EncodedLen(len([]byte("service_account_json"))))
-	base64.StdEncoding.Encode(serviceAccountJson, []byte("service_account_json"))
+	serviceAccountJSON := make([]byte, base64.StdEncoding.EncodedLen(len([]byte("service_account_json"))))
+	base64.StdEncoding.Encode(serviceAccountJSON, []byte("service_account_json"))
 	for i, tc := range []struct {
 		secret      *corev1.Secret
 		errChecker  Checker
@@ -45,7 +46,7 @@ func (s *GCPSecretSuite) TestValidateGCPCredentials(c *C) {
 				},
 				Data: map[string][]byte{
 					GCPProjectID:             []byte("key_id"),
-					GCPServiceAccountJsonKey: serviceAccountJson,
+					GCPServiceAccountJSONKey: serviceAccountJSON,
 				},
 			},
 			errChecker:  IsNil,
@@ -60,7 +61,7 @@ func (s *GCPSecretSuite) TestValidateGCPCredentials(c *C) {
 				},
 				Data: map[string][]byte{
 					GCPProjectID:             []byte("key_id"),
-					GCPServiceAccountJsonKey: serviceAccountJson,
+					GCPServiceAccountJSONKey: serviceAccountJSON,
 				},
 			},
 			errChecker:  NotNil,
@@ -77,7 +78,7 @@ func (s *GCPSecretSuite) TestValidateGCPCredentials(c *C) {
 					GCPProjectID: []byte("key_id"),
 				},
 			},
-			expectedErr: errors.Wrapf(secerrors.ErrValidate, secerrors.MissingRequiredFieldErrorMsg, GCPServiceAccountJsonKey, "ns", "sec"),
+			expectedErr: errors.Wrapf(secerrors.ErrValidate, secerrors.MissingRequiredFieldErrorMsg, GCPServiceAccountJSONKey, "ns", "sec"),
 			errChecker:  NotNil,
 		},
 		{ // missing field - GCPProjectID
@@ -88,7 +89,7 @@ func (s *GCPSecretSuite) TestValidateGCPCredentials(c *C) {
 					Namespace: "ns",
 				},
 				Data: map[string][]byte{
-					GCPServiceAccountJsonKey: []byte("service_account_json"),
+					GCPServiceAccountJSONKey: []byte("service_account_json"),
 				},
 			},
 			expectedErr: errors.Wrapf(secerrors.ErrValidate, secerrors.MissingRequiredFieldErrorMsg, GCPProjectID, "ns", "sec"),

@@ -274,7 +274,7 @@ func (s *ExecSuite) TestKopiaCommand(c *C) {
 	}
 	p, err := s.cli.CoreV1().Pods(s.namespace).Create(ctx, pod, metav1.CreateOptions{})
 	c.Assert(err, IsNil)
-	defer s.cli.CoreV1().Pods(s.namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{}) //nolint: errcheck
+	defer s.cli.CoreV1().Pods(s.namespace).Delete(ctx, pod.Name, metav1.DeleteOptions{})
 	ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
 	c.Assert(WaitForPodReady(ctxT, s.cli, s.namespace, p.Name), IsNil)
@@ -291,7 +291,7 @@ func (s *ExecSuite) TestKopiaCommand(c *C) {
 // TestContextTimeout verifies that when context is cancelled during command execution,
 // execution will be interrupted and proper error will be returned. The stdout, stderr streams should be captured.
 func (s *ExecSuite) TestContextTimeout(c *C) {
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
 	defer cancel()
 	cmd := []string{"sh", "-c", "echo abc && sleep 2 && echo def"}
 	for _, cs := range s.pod.Status.ContainerStatuses {

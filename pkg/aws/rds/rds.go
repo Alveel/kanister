@@ -23,8 +23,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
-	"github.com/kanisterio/kanister/pkg/poll"
 	"github.com/pkg/errors"
+
+	"github.com/kanisterio/kanister/pkg/poll"
 )
 
 const (
@@ -38,7 +39,7 @@ type RDS struct {
 	*rds.RDS
 }
 
-// NewRDSClient returns ec2 client struct.
+// NewClient returns ec2 client struct.
 func NewClient(ctx context.Context, awsConfig *aws.Config, region string) (*RDS, error) {
 	s, err := session.NewSession(awsConfig)
 	if err != nil {
@@ -47,7 +48,7 @@ func NewClient(ctx context.Context, awsConfig *aws.Config, region string) (*RDS,
 	return &RDS{RDS: rds.New(s, awsConfig.WithMaxRetries(maxRetries).WithRegion(region).WithCredentials(awsConfig.Credentials))}, nil
 }
 
-// CreateDBInstanceWithContext
+// CreateDBInstance return DBInstance with context
 func (r RDS) CreateDBInstance(
 	ctx context.Context,
 	storage *int64,
@@ -128,7 +129,7 @@ func (r RDS) WaitUntilDBClusterAvailable(ctx context.Context, dbClusterID string
 	})
 }
 
-// WaitDBCluster waits for DB cluster with instanceID
+// WaitOnDBCluster waits for DB cluster with instanceID
 func (r RDS) WaitOnDBCluster(ctx context.Context, dbClusterID, status string) error {
 	// describe the cluster return err if status is !Available
 	dci := &rds.DescribeDBClustersInput{

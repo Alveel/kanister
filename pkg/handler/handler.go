@@ -20,6 +20,8 @@ import (
 	"net/http"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -29,8 +31,6 @@ import (
 
 	"github.com/kanisterio/kanister/pkg/validatingwebhook"
 	"github.com/kanisterio/kanister/pkg/version"
-	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -51,7 +51,7 @@ var _ http.Handler = (*healthCheckHandler)(nil)
 type healthCheckHandler struct{}
 
 func (*healthCheckHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	version := version.VERSION
+	version := version.Version
 	info := Info{true, version}
 	js, err := json.Marshal(info)
 	if err != nil {
